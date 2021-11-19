@@ -1,0 +1,206 @@
+---
+title: "Assignment 1 - Group 59"
+date: "24. September 2021"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+highlight: tango
+---
+
+```{r, fig.height=3, fig.width=6}
+birthweight<- read.table("~/Desktop/SSO/data/birthweight.txt",sep='',header=TRUE)[,1]
+weather<- read.table("~/Desktop/SSO/data/weather.txt",sep='',header=TRUE)
+austen<- read.table("~/Desktop/SSO/data/austen.txt",sep='',header=TRUE)
+```
+## Exercise 1.1
+**a)** 
+In order to *check the normality and compute a point estimate for $\mu$* of the birthweight data, we will first calculate the mean of the dataset by using `mean(birthweight)`. The mean of birthweight data is 2913.293. As the sample mean is the best point estimate for the population mean $\mu = 2913.293$. 
+
+To evaluate the distribution of the birthweight sample, we look at the following three plots: 
+```{r}
+par(mfrow=c(1,3)); hist(birthweight); qqnorm(birthweight); qqline(birthweight, col=4) 
+boxplot(birthweight, main="Boxplot of birthweight")
+```
+
+**Histogramm:** 
+The graph shows a bell-shaped distribution, which is  approximately centered around the mean (2913.293). Therefore the graph supports the assumption of a normal distribution. 
+
+**QQ-Plot:**
+The QQ-Plot shows more or a less straight line, which also strengthens the assumption of a normally distributed dataset. 
+
+**Boxplot:**
+As the mean is equal to the median if a normal distribution applies, we can compare the median shown in the boxplot to the mean of the dataset. The median seems to be approximately the same as the mean of 2913.293.
+
+Another way to test for normality of the birthweight data is to apply the **Shapiro-Wilk test**. We test the following hyptheses: $H_0$: The distribution of birthweight is a normal distribution vs. $H_1$: The distribution of birthweight is not a normal distribution.
+
+As $p-value > \alpha$ there is no significant evidence to reject the null hypothesis that the sample comes from a population which has a normal distribution.
+
+```{r, fig.height=3, fig.width=6}
+shapiro.test(birthweight)
+```
+
+Based on our findings, one can say that the distribution of birthweight might be normaly distributed. 
+
+**b)** 
+As shown in *a)* we can assume normality in our dataset. To construct a bounded 90% confidence interval (CI) ($\alpha=0.1$) we use $\alpha /2 = 0.05$ (5% on each side). As derived from the output, the $90\%$ CI for the mean birthweight is: $[2829.2, 2997.4]$. 
+\begin{center}
+$\bar{x}\ \pm t_{\alpha/2}*\frac{s}{\sqrt{n}}$
+\end{center}
+```{r, fig.height=3, fig.width=6}
+n=length(birthweight);
+m=mean(birthweight);
+s=sd(birthweight);
+t=qt(0.95,df=n-1);
+c(m-t*s/sqrt(n),m+t*s/sqrt(n))
+```
+
+**c)** 
+We will use a one-sided t-test.
+$H_0: \mu\leq\mu_0$ vs. $H_1 : \mu > \mu_0$ with  $\mu_0=2800$
+
+```{r, fig.height=3, fig.width=6}
+t.test(birthweight,mu=2800,alt="g")
+```
+
+As the p-vaue is lower than our $\alpha$, we can reject $H_0$. That means we have significant evidence, that the mean is bigger than 2800. 
+
+**d)** 
+The confidence interval has a maximum that reaches infinity because we are now testing one-sided. We are interested if the birthweight is higher than 2800g. So the critical region is only on the right side of the bell. If we reject the null hypothsis, the mean needs to be within this critical region. This holds for all values greater than the critical value, this is also the reason why we have an infinity symbol as the maximum value of the CI.
+
+## Exercise 1.2
+Exercise 1.2 investigates the fraction (p) of working parents that receive childcare. This question uses a fictive sample of 200 (n) working parents from which 140 (x) receive childcare. 
+
+**a)**
+The first step of the analysis is to calculate the point estimate for p 
+$p= 0.7$.
+
+```{r, fig.height=3, fig.width=6}
+n = 200
+x = 140
+
+p_estimate = x/n
+p_estimate
+```
+
+**b)**
+The next step is to derive a 99% CI for p. 
+\begin{center}
+$\hat{p} - E < p < \hat{p} + E$ where $E = za/2 \sqrt{ \frac {\hat{p}* (1-\hat{p})}{n}}$
+\end{center}
+```{r, fig.height=3, fig.width=6}
+level = 0.995
+se = sqrt(p_estimate * (1- p_estimate)/n) 
+z = qnorm(level) 
+E = z*se 
+ci = round(p_estimate + c(-E, E), 4); 
+ci 
+```
+As can be viewed in the output, the 99% CI is: $[0.6165,  0.7835]$.
+
+**c)** 
+The final part of the investigation includes the following hypothesis test:
+
+$H_0$: The proportion of parents receiving childcare benefit equals 75% (p = 0.75) vs. $H_1$: The proportion of parents receiving childcare benefit is not equal to 75% (p $\neq$ 0.75)
+
+The claim is tested using a significance level of 0.10 ($\alpha$ = 0.1). The test requires a binomial test since the $H_0$ explicitly asks for an exact proportion of 0.75. 
+
+```{r} 
+p0 = 0.75
+binom.test(x = x, n= n, p=p0, alternative = "t",conf.level = 0.90)
+```
+
+The results above show a p-value of 0.103. Since the p-value is higher than $\alpha$, we failed to reject $H_0$ and therefore cannot assume that the sample mean differs from 75%. 
+
+Furthermore, the outcome of the p-value will not differ when we change the level of significance $\alpha$ since the p-value method uses the standard deviation based on the claimed proportion. However, the CI boundaries change with different values of alpha, because the CI method uses an estimated standard deviation based on the sample proportion. Nonetheless, the  p-value is leading when testing a claim about proportions.
+
+## Exercise 1.3
+
+**a)**
+The table below shows the Five-number summary of the weather dataset.
+```{r}
+summary(weather)
+```
+
+```{r}
+par(mfrow=c(1,3))
+hist(weather$humidity, main='Histogram of Humidity [%]')
+qqnorm(weather$humidity, main='Q-Q plot of Humidity [%]')
+boxplot(weather$humidity, main='Boxplot of Humidity [%]')
+```
+**Histogramm:** 
+The graph shows a bell-shaped distribution. 
+
+**QQ-Plot:**
+The QQ-Plot shows more or less straight line. 
+
+**Boxplot:**
+The median seems to be very similar to the calculated mean of 78.34 and the boxplot looks symmetrical.
+```{r}
+par(mfrow=c(1,3))
+hist(weather$temperature, main='Histogram of Temp [F]')
+qqnorm(weather$temperature, main='Q-Q plot of Temp [F]')
+boxplot(weather$temperature, main='Boxplot of Temp [F]')
+```
+**Histogramm:** 
+The graph does not show a bell-shaped distribution. 
+
+**QQ-Plot:**
+The QQ-Plot shows another systematic pattern that is not a straight line pattern. 
+
+**Boxplot:**
+The boxplot does not show symmetry.
+
+**b)**
+The graphs below show that the temperature is not distributed normally. As already mentioned in *a)* the histogram is not bell shaped and the QQ-plot is not following the straight line. 
+```{r}
+par(mfrow=c(1,2))
+hist(weather$temperature, main='Histogram of Temp [F]')
+qqnorm(weather$temperature, main='Q-Q plot of Temp [F]'); qqline(weather$temperature, col=3)
+```
+
+**c)**
+We are 90% confident that the interval from 47.487F to 57.963F does contain the true value of the mean. This means that if we were to select many different samples of the same size and construct the corresponding confidence intervals, 90% of them would contain the value of the mean. 
+```{r}
+sample.mean <- mean(weather$temperature)
+sample.n <- length(weather$temperature) 
+sample.sd <- sd(weather$temperature)
+
+t.score = qt(p=0.1/2, df = sample.n-1, lower.tail = FALSE)
+ME = t.score * (sample.sd / sqrt(sample.n))
+print(c(sample.mean - ME, sample.mean + ME))
+```
+
+**d)**
+To determine the minimum sample size with a length of at most 2% for the 95% CI, we construct the following formula:
+\begin{center}
+$2E = 2 \Rightarrow E=1$ and $za/2 = 1.96$
+\end{center}
+```{r}
+n = length(weather$humidity)
+z_score = qnorm(0.975)
+sd = sd(weather$humidity)
+sample.size = ((z_score * sd)/1)^2; sample.size
+```
+
+The minimum sample size should be 140 days to construct a 95% CI for the mean humidity such that the CI has a length of at most 2%.
+
+## Exercise 1.4
+**a)**
+The most appropriate test is a **homogeneity test**. This test examines the
+claim that the distribution over the row factors is equal. Which is also what we want to test.
+
+**b)**
+In order to investigate the homogeneity of Austen herself, we used the Chi-squared test on the first three columns. 
+```{r}
+chisq.test(austen[,-4])
+```
+The $p-value=0.1609$, which is greater than the alpha of 0.05. Therefore we
+failed to reject the claim that the distribution over the row factors is equal, which states that there is not enough significant evidence to reject that Austen was consistent in her work. 
+
+**c)**
+To compare the Admirer to Austen, we have again used the Chi-squared test, but now  included Sand2 during testing. 
+```{r}
+chisq.test(austen)
+```
+Again, we see that the $p-value=0.1208$, which is greater than the significance level of 0.05. As a result, we don't have significant evidence to reject the claim that the Admirer imitated Austin successfully. 
